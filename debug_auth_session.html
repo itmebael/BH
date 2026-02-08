@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Auth Session Issue</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .content {
+            padding: 40px;
+        }
+        .step {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="text"], input[type="password"], input[type="email"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Debug Auth Session Issue</h1>
+            <p>Test and fix the "Auth session missing" error</p>
+        </div>
+        
+        <div class="content">
+            <!-- Step 1: Send Reset Email -->
+            <div class="step">
+                <h3>📧 Step 1: Send Reset Email</h3>
+                <p>Send a reset email to get a token:</p>
+                
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" placeholder="Enter your email address" value="test@example.com">
+                </div>
+                
+                <button onclick="sendResetEmail()">📧 Send Reset Email</button>
+                
+                <div id="step1-result"></div>
+            </div>
+
+            <!-- Step 2: Test Token -->
+            <div class="step">
+                <h3>🔑 Step 2: Test Token</h3>
+                <p>Enter the token from your email and test different methods:</p>
+                
+                <div class="form-group">
+                    <label for="token">Token from Email:</label>
+                    <textarea id="token" rows="3" placeholder="Paste the token from your email here"></textarea>
+                </div>
+                
+                <button onclick="testSetSession()">🔗 Test setSession</button>
+                <button onclick="testDirectUpdate()">🔒 Test Direct Update</button>
+                <button onclick="checkCurrentSession()">👁️ Check Current Session</button>
+                
+                <div id="step2-result"></div>
+            </div>
+
+            <!-- Step 3: Test Password Update -->
+            <div class="step">
+                <h3>🔒 Step 3: Test Password Update</h3>
+                <p>Test updating password with different approaches:</p>
+                
+                <div class="form-group">
+                    <label for="password">New Password:</label>
+                    <input type="password" id="password" placeholder="Enter new password" value="newpassword123">
+                </div>
+                
+                <button onclick="testPasswordUpdate()">🔒 Test Password Update</button>
+                <button onclick="testPasswordUpdateWithToken()">🔑 Test with Token</button>
+                
+                <div id="step3-result"></div>
+            </div>
+
+            <!-- Debug Info -->
+            <div class="step">
+                <h3>🐛 Debug Information</h3>
+                <p>Current session and token information:</p>
+                
+                <button onclick="showDebugInfo()">🔍 Show Debug Info</button>
+                
+                <div id="debug-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://jlahqyvpgdntlqfpxvoz.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsYWhxeXZwZ2RudGxxZnB4dm96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMzY1MTAsImV4cCI6MjA3MjkxMjUxMH0.UrNCmuMXv9nPI8oXKD79aYzKIafk9hPg';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function sendResetEmail() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showResult('step1-result', 'Please enter an email address', 'error');
+                return;
+            }
+
+            try {
+                showResult('step1-result', 'Sending reset email...', 'info');
+                
+                const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: 'http://localhost:3000/?type=recovery',
+                });
+
+                if (error) {
+                    showResult('step1-result', 'Error: ' + error.message, 'error');
+                } else {
+                    showResult('step1-result', 
+                        `<div class="success">
+                            <strong>✅ Reset email sent!</strong><br><br>
+                            <strong>Next:</strong> Check your email for the token, then test it in Step 2.
+                        </div>`, 
+                        'success'
+                    );
+                }
+            } catch (err) {
+                showResult('step1-result', 'Error: ' + err.message, 'error');
+            }
+        }
+
+        async function testSetSession() {
+            const token = document.getElementById('token').value.trim();
+            
+            if (!token) {
+                showResult('step2-result', 'Please enter a token first', 'error');
+                return;
+            }
+
+            try {
+                showResult('step2-result', 'Testing setSession...', 'info');
+                
+                const { data, error } = await supabase.auth.setSession({
+                    access_token: token,
+                    refresh_token: ''
+                });
+
+                if (error) {
+                    showResult('step2-result', 
+                        `<div class="error">
+                            <strong>❌ setSession failed:</strong><br>
+                            ${error.message}<br><br>
+                            <strong>This is normal for some token formats.</strong>
+                        </div>`, 
+                        'error'
+                    );
+                } else {
+                    showResult('step2-result', 
+                        `<div class="success">
+                            <strong>✅ setSession successful!</strong><br><br>
+                            <strong>Session data:</strong><br>
+                            <div class="debug-info">${JSON.stringify(data, null, 2)}</div>
+                        </div>`, 
+                        'success'
+                    );
+                }
+            } catch (err) {
+                showResult('step2-result', 'Error: ' + err.message, 'error');
+            }
+        }
+
+        async function testDirectUpdate() {
+            const token = document.getElementById('token').value.trim();
+            
+            if (!token) {
+                showResult('step2-result', 'Please enter a token first', 'error');
+                return;
+            }
+
+            try {
+                showResult('step2-result', 'Testing direct password update...', 'info');
+                
+                // Try to update password directly without setting session
+                const { error } = await supabase.auth.updateUser({
+                    password: 'testpassword123'
+                });
+
+                if (error) {
+                    showResult('step2-result', 
+                        `<div class="error">
+                            <strong>❌ Direct update failed:</strong><br>
+                            ${error.message}<br><br>
+                            <strong>This confirms the auth session issue.</strong>
+                        </div>`, 
+                        'error'
+                    );
+                } else {
+                    showResult('step2-result', 
+                        `<div class="success">
+                            <strong>✅ Direct update successful!</strong><br><br>
+                            <strong>Password was updated without explicit session.</strong>
+                        </div>`, 
+                        'success'
+                    );
+                }
+            } catch (err) {
+                showResult('step2-result', 'Error: ' + err.message, 'error');
+            }
+        }
+
+        async function checkCurrentSession() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    showResult('step2-result', 'Error getting session: ' + error.message, 'error');
+                } else if (session) {
+                    showResult('step2-result', 
+                        `<div class="success">
+                            <strong>✅ Current session found:</strong><br><br>
+                            <div class="debug-info">${JSON.stringify(session, null, 2)}</div>
+                        </div>`, 
+                        'success'
+                    );
+                } else {
+                    showResult('step2-result', 
+                        `<div class="warning">
+                            <strong>⚠️ No current session</strong><br><br>
+                            This explains the "Auth session missing" error.
+                        </div>`, 
+                        'warning'
+                    );
+                }
+            } catch (err) {
+                showResult('step2-result', 'Error: ' + err.message, 'error');
+            }
+        }
+
+        async function testPasswordUpdate() {
+            const password = document.getElementById('password').value;
+            
+            try {
+                showResult('step3-result', 'Testing password update...', 'info');
+                
+                const { error } = await supabase.auth.updateUser({
+                    password: password
+                });
+
+                if (error) {
+                    showResult('step3-result', 
+                        `<div class="error">
+                            <strong>❌ Password update failed:</strong><br>
+                            ${error.message}
+                        </div>`, 
+                        'error'
+                    );
+                } else {
+                    showResult('step3-result', 
+                        `<div class="success">
+                            <strong>✅ Password update successful!</strong><br><br>
+                            <strong>New password:</strong> ${password}
+                        </div>`, 
+                        'success'
+                    );
+                }
+            } catch (err) {
+                showResult('step3-result', 'Error: ' + err.message, 'error');
+            }
+        }
+
+        async function testPasswordUpdateWithToken() {
+            const token = document.getElementById('token').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!token) {
+                showResult('step3-result', 'Please enter a token first', 'error');
+                return;
+            }
+
+            try {
+                showResult('step3-result', 'Testing password update with token...', 'info');
+                
+                // First set session, then update password
+                const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+                    access_token: token,
+                    refresh_token: ''
+                });
+
+                if (sessionError) {
+                    showResult('step3-result', 
+                        `<div class="error">
+                            <strong>❌ Session setup failed:</strong><br>
+                            ${sessionError.message}<br><br>
+                            <strong>Trying direct update anyway...</strong>
+                        </div>`, 
+                        'error'
+                    );
+                }
+
+                const { error } = await supabase.auth.updateUser({
+                    password: password
+                });
+
+                if (error) {
+                    showResult('step3-result', 
+                        `<div class="error">
+                            <strong>❌ Password update failed:</strong><br>
+                            ${error.message}
+                        </div>`, 
+                        'error'
+                    );
+                } else {
+                    showResult('step3-result', 
+                        `<div class="success">
+                            <strong>✅ Password update successful!</strong><br><br>
+                            <strong>New password:</strong> ${password}
+                        </div>`, 
+                        'success'
+                    );
+                }
+            } catch (err) {
+                showResult('step3-result', 'Error: ' + err.message, 'error');
+            }
+        }
+
+        async function showDebugInfo() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                
+                let debugInfo = '<div class="debug-info">';
+                debugInfo += '<strong>Current Session:</strong><br>';
+                debugInfo += session ? JSON.stringify(session, null, 2) : 'No session';
+                debugInfo += '<br><br><strong>Current User:</strong><br>';
+                debugInfo += user ? JSON.stringify(user, null, 2) : 'No user';
+                debugInfo += '<br><br><strong>Supabase URL:</strong><br>';
+                debugInfo += supabaseUrl;
+                debugInfo += '</div>';
+
+                showResult('debug-result', debugInfo, 'info');
+            } catch (err) {
+                showResult('debug-result', 'Error getting debug info: ' + err.message, 'error');
+            }
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+

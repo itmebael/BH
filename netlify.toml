@@ -1,0 +1,17 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "18.20.0"
+  NPM_VERSION = "10.0.0"
+
+# Explicitly disable Next.js plugin (this is a Create React App project)
+# No plugins section needed - CRA doesn't require Netlify plugins
+
+# Configure redirects for SPA (React Router)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Supabase Connection Test</h1>
+    <div id="results"></div>
+    <button onclick="testConnection()">Test Connection</button>
+
+    <script>
+        // Your Supabase configuration
+        const supabaseUrl = 'https://jlahqyvpgdntlqfpxvoz.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsYWhxeXZwZ2RudGxxZnB4dm96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMzY1MTAsImV4cCI6MjA3MjkxMjUxMH0.UrNCmuMXv9nPI8oXKD79aYzKI8VQnfWvprKIafk9hPg';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function testConnection() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h2>Testing Connection...</h2>';
+            
+            try {
+                // Test 1: Basic connection
+                console.log('Test 1: Basic connection test');
+                const { data: testData, error: testError } = await supabase
+                    .from('reviews')
+                    .select('count')
+                    .limit(1);
+                
+                if (testError) {
+                    console.error('Test 1 failed:', testError);
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ Test 1 Failed: ${testError.message}</p>`;
+                    resultsDiv.innerHTML += `<p>Error details: ${JSON.stringify(testError, null, 2)}</p>`;
+                } else {
+                    console.log('Test 1 passed:', testData);
+                    resultsDiv.innerHTML += `<p style="color: green;">✅ Test 1 Passed: Basic connection works</p>`;
+                }
+                
+                // Test 2: Properties table
+                console.log('Test 2: Properties table test');
+                const { data: propData, error: propError } = await supabase
+                    .from('properties')
+                    .select('id')
+                    .limit(1);
+                
+                if (propError) {
+                    console.error('Test 2 failed:', propError);
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ Test 2 Failed: ${propError.message}</p>`;
+                } else {
+                    console.log('Test 2 passed:', propData);
+                    resultsDiv.innerHTML += `<p style="color: green;">✅ Test 2 Passed: Properties table accessible</p>`;
+                }
+                
+                // Test 3: Direct API call
+                console.log('Test 3: Direct API call');
+                try {
+                    const response = await fetch(`${supabaseUrl}/rest/v1/reviews`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': supabaseKey,
+                            'Authorization': `Bearer ${supabaseKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        resultsDiv.innerHTML += `<p style="color: green;">✅ Test 3 Passed: Direct API call works</p>`;
+                    } else {
+                        resultsDiv.innerHTML += `<p style="color: red;">❌ Test 3 Failed: HTTP ${response.status} - ${response.statusText}</p>`;
+                    }
+                } catch (fetchError) {
+                    console.error('Test 3 failed:', fetchError);
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ Test 3 Failed: ${fetchError.message}</p>`;
+                }
+                
+                // Test 4: Check if reviews table exists
+                console.log('Test 4: Check table structure');
+                const { data: tableData, error: tableError } = await supabase
+                    .from('reviews')
+                    .select('id, property_id, client_email, client_name, rating, review_text, is_verified, created_at')
+                    .limit(1);
+                
+                if (tableError) {
+                    console.error('Test 4 failed:', tableError);
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ Test 4 Failed: ${tableError.message}</p>`;
+                } else {
+                    console.log('Test 4 passed:', tableData);
+                    resultsDiv.innerHTML += `<p style="color: green;">✅ Test 4 Passed: Table structure is correct</p>`;
+                }
+                
+            } catch (error) {
+                console.error('Connection test error:', error);
+                resultsDiv.innerHTML += `<p style="color: red;">❌ General Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
+

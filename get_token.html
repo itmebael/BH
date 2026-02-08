@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Reset Password Token</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+        }
+        .token {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .copy-btn {
+            background: #28a745;
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        .copy-btn:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Get Reset Password Token</h1>
+        <p>Enter an email address to get a reset password token that you can use directly in the browser.</p>
+        
+        <div class="input-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" placeholder="Enter email address" value="test@example.com">
+        </div>
+        
+        <button onclick="getToken()">Get Reset Token</button>
+        
+        <div id="result" class="result" style="display: none;">
+            <h3>✅ Reset Token Generated!</h3>
+            <p><strong>Email:</strong> <span id="emailResult"></span></p>
+            <p><strong>Reset URL:</strong></p>
+            <div class="token" id="resetUrl"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">📋 Copy URL</button>
+            
+            <h4>How to use:</h4>
+            <ol>
+                <li>Copy the URL above</li>
+                <li>Open a new browser tab</li>
+                <li>Paste the URL in the address bar</li>
+                <li>Press Enter to go to the reset password page</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://jlahqyvpgdntlqfpxvoz.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsYWhxeXZwZ2RudGxxZnB4dm96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMzY1MTAsImV4cCI6MjA3MjkxMjUxMH0.UrNCmuMXv9nPI8oXKD79aYzKI8VQnfWvprKIafk9hPg';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function getToken() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: 'http://localhost:3000/?type=recovery',
+                });
+
+                if (error) {
+                    alert('Error: ' + error.message);
+                    return;
+                }
+
+                // Show the result
+                document.getElementById('emailResult').textContent = email;
+                document.getElementById('resetUrl').textContent = `http://localhost:3000/?type=recovery&access_token=TOKEN_WILL_BE_IN_EMAIL&refresh_token=REFRESH_TOKEN`;
+                document.getElementById('result').style.display = 'block';
+
+                alert('✅ Reset password email sent! Check your email for the actual token link.');
+                
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function copyToClipboard() {
+            const url = document.getElementById('resetUrl').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('URL copied to clipboard!');
+            });
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getToken();
+            }
+        });
+    </script>
+</body>
+</html>
+
