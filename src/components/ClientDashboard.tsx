@@ -1402,12 +1402,12 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
         
         {/* Location Header - Glassmorphism */}
         <div className="backdrop-blur-xl bg-white/70 border-b border-white/20 px-3 sm:px-6 py-3 sm:py-4 flex-shrink-0 sticky top-0 z-40 shadow-sm">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-3 sm:gap-4">
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-              <div className="flex-1 sm:flex-none">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between w-full gap-3 sm:gap-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full lg:w-auto">
+              <div className="flex-1 lg:flex-none">
                 <p className="text-xs sm:text-sm text-gray-500">Your Location</p>
                 <div className="flex items-center space-x-2">
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate max-w-[50vw] sm:max-w-[60vw]">{currentLocation}</h1>
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate max-w-[70vw] sm:max-w-[60vw]">{currentLocation}</h1>
                   <button
                     onClick={getCurrentLocation}
                     className="text-primary-600 hover:text-primary-700 transition-colors duration-200 flex-shrink-0"
@@ -1421,9 +1421,9 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
-              <div className="flex items-center space-x-2 flex-1 sm:flex-none min-w-0">
-                <div className="relative flex-1 sm:flex-none sm:w-64">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-4 w-full lg:w-auto">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 sm:flex-none min-w-0 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none w-full sm:w-64">
                   <input
                     type="text"
                     placeholder="Search properties..."
@@ -1442,7 +1442,7 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
                 </div>
                 <button
                   onClick={applyFilters}
-                  className="glass-button px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all duration-200 flex items-center space-x-1 sm:space-x-2 flex-shrink-0 transform hover:-translate-y-0.5"
+                  className="glass-button px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all duration-200 flex items-center justify-center space-x-1 sm:space-x-2 flex-shrink-0 transform hover:-translate-y-0.5 w-full sm:w-auto"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1455,7 +1455,7 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
                       setSearchLocation('');
                       applyFilters();
                     }}
-                    className="backdrop-blur-md bg-white/60 text-gray-700 px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:bg-white/80 transition-all duration-200 flex items-center space-x-1 sm:space-x-2 flex-shrink-0 border border-white/30 shadow-sm"
+                    className="backdrop-blur-md bg-white/60 text-gray-700 px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:bg-white/80 transition-all duration-200 flex items-center justify-center space-x-1 sm:space-x-2 flex-shrink-0 border border-white/30 shadow-sm w-full sm:w-auto"
                   >
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1466,7 +1466,7 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="glass-button px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all duration-200 flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
+                className="glass-button px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all duration-200 flex items-center justify-center space-x-1 sm:space-x-2 flex-shrink-0 w-full sm:w-auto"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
@@ -1475,10 +1475,10 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
               </button>
               
               {/* View Toggle - Properties / My Bookings */}
-              <div className="flex items-center gap-2 backdrop-blur-md bg-white/60 rounded-xl p-1 border border-white/30 shadow-sm">
+              <div className="flex items-center gap-2 backdrop-blur-md bg-white/60 rounded-xl p-1 border border-white/30 shadow-sm w-full sm:w-auto">
                 <button
                   onClick={() => setActiveView('properties')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm font-semibold ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm font-semibold flex-1 sm:flex-none ${
                     activeView === 'properties'
                       ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
                       : 'text-gray-700 hover:bg-white/80'
@@ -1488,7 +1488,7 @@ export default function ClientDashboard({ onBack }: ClientDashboardProps) {
                 </button>
                 <button
                   onClick={() => setActiveView('bookings')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm font-semibold relative ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm font-semibold relative flex-1 sm:flex-none ${
                     activeView === 'bookings'
                       ? 'bg-primary-600 text-white shadow-md'
                       : 'text-gray-700 hover:bg-white/80'
