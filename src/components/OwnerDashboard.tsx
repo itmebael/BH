@@ -564,9 +564,45 @@ export default function OwnerDashboard({ onBack }: OwnerDashboardProps) {
     // Guard: only allow landlord role
     const enforceLandlordRole = async () => {
       try {
-        const { error } = await supabase.rpc('validate_role', { expected: 'owner' });
-        if (error) {
-          alert(error.message || 'Access denied: landlord role required.');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert('Access denied: Please login first.');
+          onBack();
+          return;
+        }
+
+        const metaRole = (user.user_metadata?.role === 'owner' ? 'owner' : 'client') as 'owner' | 'client';
+
+        const { data: appUser, error: appUserError, status } = await supabase
+          .from('app_users')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!appUser && (status === 406 || appUserError?.code === 'PGRST116' || !appUserError)) {
+          if (metaRole !== 'owner') {
+            alert('Access denied: landlord role required.');
+            onBack();
+            return;
+          }
+
+          const { error: insertError } = await supabase
+            .from('app_users')
+            .insert({
+              user_id: user.id,
+              email: user.email,
+              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+              role: 'owner'
+            });
+
+          if (insertError) {
+            console.warn('Failed to create app_users row for owner:', insertError);
+          }
+        }
+
+        const effectiveRole = appUser?.role || metaRole;
+        if (effectiveRole !== 'owner') {
+          alert('Access denied: landlord role required.');
           onBack();
           return;
         }
@@ -3988,9 +4024,36 @@ export default function OwnerDashboard({ onBack }: OwnerDashboardProps) {
                       profileError = err;
                     }
 
-                    // Update app_users table
                     let appUserError = null;
                     try {
+                      const { data: existingAppUser } = await supabase
+                        .from('app_users')
+                        .select('user_id')
+                        .eq('email', email)
+                        .maybeSingle();
+
+                      if (!existingAppUser) {
+                        if (!user?.id) {
+                          throw new Error('Missing user id for app_users insert');
+                        }
+                        const { error: insertError } = await supabase
+                          .from('app_users')
+                          .insert({
+                            user_id: user.id,
+                            email: email,
+                            full_name: profileData.full_name,
+                            role: 'owner',
+                            phone: profileData.phone || null,
+                            address: profileData.address || null,
+                            barangay: profileData.barangay || null,
+                            city: profileData.city || null,
+                            profile_image_url: profileImageUrl || null
+                          });
+                        if (insertError) {
+                          throw insertError;
+                        }
+                      }
+
                       const { error } = await supabase
                         .from('app_users')
                         .update({
